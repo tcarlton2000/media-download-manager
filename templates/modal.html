@@ -1,0 +1,45 @@
+<div id="modal" _="on closeModal add .closing then wait for animationend then remove me">
+	<div class="modal-underlay" _="on click trigger closeModal"></div>
+	<div class="modal-content">
+		<h1 class="text-xl font-bold">New Download</h1>
+		<form hx-post="/new-download/" hx-target="#download-list" hx-swap="beforeend"
+                hx-on::after-request=" if(event.detail.successful) this.reset()">
+                <div class="mb-4">
+                    <label for="download-url" class="block text-sm font-bold mb-2">URL</label>
+                    <input type="text" name="url" id="download-title"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline" />
+                </div>
+
+				<div class="mb-6">
+					<label for="directory" class="block text-sm font-bold mb-2">Directory</label>
+					{{ block "directory-list" .}}
+					<div id="directory-list">
+						<input name="directory" class="hidden" value="{{ .CurrentDirectory }}">
+						Current Directory: {{ .CurrentDirectory }}
+						<select name="directory-picker" multiple class="w-full">
+							<option value="{{ $.PreviousDirectory }}" hx-trigger="click" hx-post="/directories/" hx-target="#directory-list" hx-swap="outerHTML">..</option>
+							{{ range .Directories }}
+							<option value="{{ $.CurrentDirectory }}/{{ .Name }}" hx-trigger="click" hx-post="/directories/" hx-target="#directory-list" hx-swap="outerHTML">{{ .Name }}</option>
+							{{ end }}
+						</select>
+						{{ end }}
+					</div>
+				</div>
+
+                <button
+					type="submit"
+					_="on click trigger closeModal"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+				>
+					Submit
+				</button>
+				<button
+					type="button"
+					_="on click trigger closeModal"
+					class="font-bold py-2 px-4 rounded"
+				>
+					Close
+				</button>
+            </form>
+	</div>
+</div>

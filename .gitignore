@@ -1,0 +1,8 @@
+# Tailwind command line tool
+tailwindcss
+
+# Generated output from Tailwind command line tool
+static/css/output.css
+
+## Compiled executable
+main
