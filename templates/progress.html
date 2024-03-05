@@ -8,7 +8,11 @@
             <!-- Progress Circle inside a group with rotation -->
             <g class="origin-center -rotate-90 transform">
                 <circle cx="9" cy="9" r="7" fill="none"
+                    {{ if lt .Progress 100.0 }}
                     class="stroke-current text-blue-600 dark:text-blue-500" stroke-width="2"
+                    {{ else }}
+                    class="stroke-current text-green-600 dark:text-green-500" stroke-width="2"
+                    {{ end }}
                     stroke-dasharray="43.96" stroke-dashoffset="{{ .DashOffset }}"></circle>
             </g>
         </svg>
@@ -16,7 +20,7 @@
         <div
             class="absolute top-1/2 start-1/2 transform -translate-y-1/2 -translate-x-1/2 items-center">
             <span class="text-center text-xs font-bold text-gray-800 dark:text-white">{{
-                .Download.Progress
+                .Progress
                 }}%</span>
         </div>
     </div>

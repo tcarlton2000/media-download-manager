@@ -32,8 +32,8 @@ type Download struct {
 }
 
 type DownloadRow struct {
-	Download   Download
-	DashOffset float32
+	Download      Download
+	ProgressProps ProgressProps
 }
 
 type DownloadModalProps struct {
@@ -42,12 +42,16 @@ type DownloadModalProps struct {
 	Directories       []os.DirEntry
 }
 
-func calculateDashOffset(progress float32) float32 {
-	return ((100 - progress) / 100) * 43.96
+type ProgressProps struct {
+	Progress float32
+}
+
+func (p ProgressProps) DashOffset() float32 {
+	return ((100 - p.Progress) / 100) * 43.96
 }
 
 func createDownloadRow(download Download) DownloadRow {
-	return DownloadRow{Download: download, DashOffset: calculateDashOffset(download.Progress)}
+	return DownloadRow{Download: download, ProgressProps: ProgressProps{Progress: download.Progress}}
 }
 
 func getPreviousDirectory(directory string) string {

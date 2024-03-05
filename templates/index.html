@@ -28,7 +28,7 @@
             {{ block "download-list-element" .}}
             <li class="p-3 flex justify-between items-center">
                 <div class="flex gap-2 items-center">
-                    {{ template "progress" . }}
+                    {{ template "progress" .ProgressProps }}
                     <span>{{ .Download.Title }} - {{ .Download.Url }} - {{ .Download.Status }} - {{ .Download.TimeRemaining }}</span>
                 </div>
                 <img class="cursor-pointer" width="24px" src="static/icons/close.svg" hx-delete="/downloads">
