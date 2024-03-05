@@ -22,20 +22,6 @@ const (
 	ERROR       = Status(3)
 )
 
-type Download struct {
-	Id            int
-	Title         string
-	Url           string
-	Status        Status
-	TimeRemaining time.Duration
-	Progress      float32
-}
-
-type DownloadRow struct {
-	Download      Download
-	ProgressProps ProgressProps
-}
-
 type DownloadModalProps struct {
 	CurrentDirectory  string
 	PreviousDirectory string
@@ -48,10 +34,6 @@ type ProgressProps struct {
 
 func (p ProgressProps) DashOffset() float32 {
 	return ((100 - p.Progress) / 100) * 43.96
-}
-
-func createDownloadRow(download Download) DownloadRow {
-	return DownloadRow{Download: download, ProgressProps: ProgressProps{Progress: download.Progress}}
 }
 
 func getPreviousDirectory(directory string) string {
@@ -174,7 +156,7 @@ func main() {
 
 		var downloadRows []DownloadRow
 		for _, d := range downloads {
-			downloadRows = append(downloadRows, createDownloadRow(d))
+			downloadRows = append(downloadRows, d.DownloadRow())
 		}
 
 		keyMap := map[string][]DownloadRow{
@@ -188,7 +170,7 @@ func main() {
 		newDownload := downloadVideo(nextId, url)
 		downloads = append(downloads, newDownload)
 		tmpl := template.Must(template.ParseFiles("templates/index.html", "templates/progress.html"))
-		tmpl.ExecuteTemplate(w, "download-list-element", createDownloadRow(newDownload))
+		tmpl.ExecuteTemplate(w, "download-list-element", newDownload.DownloadRow())
 		nextId++
 	}
 
