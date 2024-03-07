@@ -7,6 +7,12 @@ import (
 	"media-download-manager/modules"
 )
 
+var DOWNLOADS_TEMPLATE []string = []string{
+	"templates/index.html",
+	"templates/progress.html",
+	"templates/close.html",
+}
+
 type DownloadRow struct {
 	Download      modules.Download
 	ProgressProps ProgressProps
@@ -21,8 +27,12 @@ func (p ProgressProps) DashOffset() float32 {
 	return ((100 - p.Progress) / 100) * 43.96
 }
 
+func createDownloadRow(d modules.Download) DownloadRow {
+	return DownloadRow{Download: d, ProgressProps: ProgressProps{Progress: d.Progress}}
+}
+
 func (a *App) DownloadList(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/index.html", "templates/progress.html", "templates/close.html"))
+	tmpl := template.Must(template.ParseFiles(DOWNLOADS_TEMPLATE...))
 
 	var downloadRows []DownloadRow
 	for _, d := range a.mock.Downloads {
@@ -35,6 +45,10 @@ func (a *App) DownloadList(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, keyMap)
 }
 
-func createDownloadRow(d modules.Download) DownloadRow {
-	return DownloadRow{Download: d, ProgressProps: ProgressProps{Progress: d.Progress}}
+func (a *App) NewDownload(w http.ResponseWriter, r *http.Request) {
+	url := r.PostFormValue("url")
+	downloadPath := r.PostFormValue("directory")
+	newDownload := modules.DownloadVideo(a.mock, url, downloadPath)
+	tmpl := template.Must(template.ParseFiles(DOWNLOADS_TEMPLATE...))
+	tmpl.ExecuteTemplate(w, "download-list-element", createDownloadRow(newDownload))
 }

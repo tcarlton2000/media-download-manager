@@ -6,9 +6,12 @@ import (
 	"os"
 	"strings"
 	"text/template"
-
-	"media-download-manager/modules"
 )
+
+var DOWNLOAD_MODAL_TEMPLATE []string = []string{
+	"templates/modal.html",
+	"templates/directory_picker.html",
+}
 
 type DownloadModalProps struct {
 	CurrentDirectory  string
@@ -34,7 +37,7 @@ func (a *App) DownloadModal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tmpl := template.Must(template.ParseFiles("templates/modal.html", "templates/directory_picker.html"))
+	tmpl := template.Must(template.ParseFiles(DOWNLOAD_MODAL_TEMPLATE...))
 	tmpl.Execute(w, DownloadModalProps{
 		CurrentDirectory:  currentDirectory,
 		PreviousDirectory: getPreviousDirectory(currentDirectory),
@@ -57,20 +60,12 @@ func (a *App) RefreshDirectoryList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tmpl := template.Must(template.ParseFiles("templates/modal.html", "templates/directory_picker.html"))
+	tmpl := template.Must(template.ParseFiles(DOWNLOAD_MODAL_TEMPLATE...))
 	tmpl.ExecuteTemplate(w, "directory-list", DownloadModalProps{
 		CurrentDirectory:  directory,
 		PreviousDirectory: getPreviousDirectory(directory),
 		Directories:       directories,
 	})
-}
-
-func (a *App) NewDownload(w http.ResponseWriter, r *http.Request) {
-	url := r.PostFormValue("url")
-	downloadPath := r.PostFormValue("directory")
-	newDownload := modules.DownloadVideo(a.mock, url, downloadPath)
-	tmpl := template.Must(template.ParseFiles("templates/index.html", "templates/progress.html"))
-	tmpl.ExecuteTemplate(w, "download-list-element", createDownloadRow(newDownload))
 }
 
 func getPreviousDirectory(directory string) string {
