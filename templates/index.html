@@ -34,7 +34,7 @@
                         <div class="text-gray-800 dark:text-white">{{ .Download.TimeRemaining }}</div>
                     </div>
                 </div>
-                <div class="text-black dark:text-white fill-current w-6 h-6 cursor-pointer shrink-0" hx-delete="/downloads">
+                <div class="text-black dark:text-white fill-current w-6 h-6 cursor-pointer shrink-0" hx-delete="/downloads/{{ .Download.Id }}">
                     {{ template "close-icon" }}
                 </div>
             </li>

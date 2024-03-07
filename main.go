@@ -13,15 +13,11 @@ func main() {
 	app.Init()
 	fmt.Println("App Started")
 
-	delete := func(w http.ResponseWriter, r *http.Request) {
-		fmt.Print("DELETE")
-	}
-
 	http.HandleFunc("/", app.DownloadList)
-	http.HandleFunc("/modal", app.DownloadModal)
-	http.HandleFunc("/new-download/", app.NewDownload)
-	http.HandleFunc("/downloads", delete)
-	http.HandleFunc("/directories/", app.RefreshDirectoryList)
+	http.HandleFunc("GET /modal", app.DownloadModal)
+	http.HandleFunc("POST /new-download/", app.NewDownload)
+	http.HandleFunc("DELETE /downloads/{id}", app.DeleteDownload)
+	http.HandleFunc("POST /directories/", app.RefreshDirectoryList)
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
