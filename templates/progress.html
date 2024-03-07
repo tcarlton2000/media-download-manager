@@ -1,5 +1,5 @@
 {{ define "progress" }}
-    <div class="relative size-14">
+    <div class="relative size-14 shrink-0">
         <svg class="size-full" width="18" height="18" viewBox="0 0 18 18"
             xmlns="http://www.w3.org/2000/svg">
             <!-- Background Circle -->
@@ -19,9 +19,9 @@
         <!-- Percentage Text -->
         <div
             class="absolute top-1/2 start-1/2 transform -translate-y-1/2 -translate-x-1/2 items-center">
-            <span class="text-center text-xs font-bold text-gray-800 dark:text-white">{{
-                .Progress
-                }}%</span>
+            <span class="text-center text-xs font-bold text-gray-800 dark:text-white">
+                {{ .Progress }}%
+            </span>
         </div>
     </div>
 {{ end }}

@@ -1,6 +1,6 @@
 package app
 
-import "github.com/tcarlton2000/media-download-manager/modules"
+import "media-download-manager/modules"
 
 type App struct {
 	mock modules.Mock

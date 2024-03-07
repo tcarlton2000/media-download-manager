@@ -2,11 +2,11 @@ module main
 
 go 1.21.7
 
-replace github.com/tcarlton2000/media-download-manager/modules => ./modules
+replace media-download-manager/modules => ./modules
 
-replace github.com/tcarlton2000/media-download-manager/app => ./app
+replace media-download-manager/app => ./app
 
-require github.com/tcarlton2000/media-download-manager/app v0.0.0-00010101000000-000000000000
+require media-download-manager/app v0.0.0-00010101000000-000000000000
 
 require (
 	github.com/bitly/go-simplejson v0.5.1 // indirect
@@ -15,6 +15,6 @@ require (
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/google/pprof v0.0.0-20231101202521-4ca4178f5c7a // indirect
 	github.com/kkdai/youtube/v2 v2.10.0 // indirect
-	github.com/tcarlton2000/media-download-manager/modules v0.0.0-00010101000000-000000000000 // indirect
 	golang.org/x/text v0.14.0 // indirect
+	media-download-manager/modules v0.0.0-00010101000000-000000000000 // indirect
 )

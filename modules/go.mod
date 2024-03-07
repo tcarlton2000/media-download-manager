@@ -1,4 +1,4 @@
-module github.com/tcarlton2000/media-download-manager/modules
+module media-download-manager/modules
 
 go 1.21.7
 

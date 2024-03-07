@@ -61,7 +61,17 @@ func (m *Mock) Init() {
 			Progress:      0,
 			TimeRemaining: timeDurations[3],
 		},
+		{
+			Id:            3,
+			Title:         "Dragonflight Crests Got Uncapped... But They're Still Not Account Wide",
+			Url:           " https://www.youtube.com/watch?v=nL7XxVZOqeg",
+			Status:        PENDING,
+			DownloadPath:  "/downloads/four",
+			Progress:      0,
+			TimeRemaining: timeDurations[3],
+		},
 	}
+	m.NextId = 5
 }
 
 func (m *Mock) NewDownload(title string, url string, downloadPath string) Download {

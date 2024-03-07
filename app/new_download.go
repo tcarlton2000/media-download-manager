@@ -7,7 +7,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/tcarlton2000/media-download-manager/modules"
+	"media-download-manager/modules"
 )
 
 type DownloadModalProps struct {
@@ -34,7 +34,7 @@ func (a *App) DownloadModal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tmpl := template.Must(template.ParseFiles("templates/modal.html"))
+	tmpl := template.Must(template.ParseFiles("templates/modal.html", "templates/directory_picker.html"))
 	tmpl.Execute(w, DownloadModalProps{
 		CurrentDirectory:  currentDirectory,
 		PreviousDirectory: getPreviousDirectory(currentDirectory),
@@ -57,7 +57,7 @@ func (a *App) RefreshDirectoryList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tmpl := template.Must(template.ParseFiles("templates/modal.html"))
+	tmpl := template.Must(template.ParseFiles("templates/modal.html", "templates/directory_picker.html"))
 	tmpl.ExecuteTemplate(w, "directory-list", DownloadModalProps{
 		CurrentDirectory:  directory,
 		PreviousDirectory: getPreviousDirectory(directory),

@@ -11,9 +11,9 @@
     <title>Media Download Manager</title>
 </head>
 
-<body>
+<body class="bg-white dark:bg-gray-700">
     <div class="container mx-auto px-4">
-        <h1 class="mb-4 text-4xl font-bold">Media Download Manager</h1>
+        <h1 class="mb-4 text-4xl font-bold text-gray-800 dark:text-white">Media Download Manager</h1>
 
         <div class="w-full text-right mb-4">
             <button hx-get="/modal" hx-target="body" hx-swap="beforeend"
@@ -26,10 +26,13 @@
             class="w-full divide-y divide-gray-200 border-2 border-solid rounded-lg border-gray-200">
             {{ range .Downloads }}
             {{ block "download-list-element" .}}
-            <li class="p-3 flex justify-between items-center">
+            <li class="p-3 flex justify-between items-center gap-2">
                 <div class="flex gap-2 items-center">
                     {{ template "progress" .ProgressProps }}
-                    <span>{{ .Download.Title }} - {{ .Download.Url }} - {{ .Download.Status }} - {{ .Download.TimeRemaining }}</span>
+                    <div>
+                        <div class="font-bold text-gray-800 dark:text-white">{{ .Download.Title }}</div>
+                        <div class="text-gray-800 dark:text-white">{{ .Download.TimeRemaining }}</div>
+                    </div>
                 </div>
                 <img class="cursor-pointer" width="24px" src="static/icons/close.svg" hx-delete="/downloads">
             </li>

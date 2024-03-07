@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/tcarlton2000/media-download-manager/app"
+	"media-download-manager/app"
 )
 
 func main() {

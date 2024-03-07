@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/tcarlton2000/media-download-manager/modules"
+	"media-download-manager/modules"
 )
 
 type DownloadRow struct {

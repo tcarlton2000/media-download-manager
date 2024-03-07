@@ -1,10 +1,10 @@
-module github.com/tcarlton2000/media-download-manager/app
+module media-download-manager/app
 
 go 1.21.7
 
-replace github.com/tcarlton2000/media-download-manager/modules => ../modules
+replace media-download-manager/modules => ../modules
 
-require github.com/tcarlton2000/media-download-manager/modules v0.0.0-00010101000000-000000000000
+require media-download-manager/modules v0.0.0-00010101000000-000000000000
 
 require (
 	github.com/bitly/go-simplejson v0.5.1 // indirect
