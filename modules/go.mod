@@ -1,6 +1,6 @@
 module media-download-manager/modules
 
-go 1.21.7
+go 1.22.1
 
 require github.com/kkdai/youtube/v2 v2.10.0
 

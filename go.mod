@@ -1,6 +1,6 @@
 module main
 
-go 1.21.7
+go 1.22.1
 
 replace media-download-manager/modules => ./modules
 
