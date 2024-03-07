@@ -34,7 +34,9 @@
                         <div class="text-gray-800 dark:text-white">{{ .Download.TimeRemaining }}</div>
                     </div>
                 </div>
-                <img class="cursor-pointer" width="24px" src="static/icons/close.svg" hx-delete="/downloads">
+                <div class="text-black dark:text-white fill-current w-6 h-6 cursor-pointer shrink-0" hx-delete="/downloads">
+                    {{ template "close-icon" }}
+                </div>
             </li>
             {{ end }}
             {{ end }}

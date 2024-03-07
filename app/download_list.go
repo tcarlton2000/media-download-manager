@@ -22,7 +22,7 @@ func (p ProgressProps) DashOffset() float32 {
 }
 
 func (a *App) DownloadList(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/index.html", "templates/progress.html"))
+	tmpl := template.Must(template.ParseFiles("templates/index.html", "templates/progress.html", "templates/close.html"))
 
 	var downloadRows []DownloadRow
 	for _, d := range a.mock.Downloads {
