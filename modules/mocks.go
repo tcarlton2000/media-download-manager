@@ -2,12 +2,13 @@ package modules
 
 import (
 	"log"
+	"media-download-manager/types"
 	"time"
 )
 
 type Mock struct {
-	NextId    int
-	Downloads []Download
+	NextId    int64
+	Downloads []types.Download
 }
 
 func (m *Mock) Init() {
@@ -24,12 +25,12 @@ func (m *Mock) Init() {
 		timeDurations = append(timeDurations, d)
 	}
 
-	m.Downloads = []Download{
+	m.Downloads = []types.Download{
 		{
 			Id:            0,
 			Title:         "Download 0",
 			Url:           "https://youtube.com/0",
-			Status:        COMPLETED,
+			Status:        types.COMPLETED,
 			DownloadPath:  "/downloads/one",
 			Progress:      100,
 			TimeRemaining: timeDurations[0],
@@ -38,7 +39,7 @@ func (m *Mock) Init() {
 			Id:            1,
 			Title:         "Download 1",
 			Url:           "https://youtube.com/1",
-			Status:        ERROR,
+			Status:        types.ERROR,
 			DownloadPath:  "/downloads/two",
 			Progress:      67,
 			TimeRemaining: timeDurations[1],
@@ -47,7 +48,7 @@ func (m *Mock) Init() {
 			Id:            2,
 			Title:         "Download 2",
 			Url:           "https://youtube.com/2",
-			Status:        IN_PROGRESS,
+			Status:        types.IN_PROGRESS,
 			DownloadPath:  "/downloads/three",
 			Progress:      50,
 			TimeRemaining: timeDurations[2],
@@ -56,7 +57,7 @@ func (m *Mock) Init() {
 			Id:            3,
 			Title:         "Download 3",
 			Url:           "https://youtube.com/3",
-			Status:        PENDING,
+			Status:        types.PENDING,
 			DownloadPath:  "/downloads/four",
 			Progress:      0,
 			TimeRemaining: timeDurations[3],
@@ -65,7 +66,7 @@ func (m *Mock) Init() {
 			Id:            3,
 			Title:         "Dragonflight Crests Got Uncapped... But They're Still Not Account Wide",
 			Url:           " https://www.youtube.com/watch?v=nL7XxVZOqeg",
-			Status:        PENDING,
+			Status:        types.PENDING,
 			DownloadPath:  "/downloads/four",
 			Progress:      0,
 			TimeRemaining: timeDurations[3],
@@ -74,14 +75,13 @@ func (m *Mock) Init() {
 	m.NextId = 5
 }
 
-func (m *Mock) NewDownload(title string, url string, downloadPath string) Download {
-	d := Download{
+func (m *Mock) NewDownload(title string, url string, downloadPath string) types.Download {
+	d := types.Download{
 		Id:           m.NextId,
 		Title:        title,
 		Url:          url,
 		DownloadPath: downloadPath,
-		Status:       PENDING,
-		Progress:     0,
+		Status:       types.PENDING,
 	}
 
 	m.Downloads = append(m.Downloads, d)

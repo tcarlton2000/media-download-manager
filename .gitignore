@@ -4,5 +4,8 @@ tailwindcss
 # Generated output from Tailwind command line tool
 static/css/output.css
 
-## Compiled executable
+# Compiled executable
 main
+
+# Database
+media-download-manager.db

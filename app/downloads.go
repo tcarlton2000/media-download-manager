@@ -1,12 +1,12 @@
 package app
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 	"text/template"
 
 	"media-download-manager/modules"
+	"media-download-manager/types"
 )
 
 var DOWNLOADS_TEMPLATE []string = []string{
@@ -16,12 +16,13 @@ var DOWNLOADS_TEMPLATE []string = []string{
 }
 
 type DownloadRow struct {
-	Download      modules.Download
+	Download      types.Download
 	ProgressProps ProgressProps
 }
 
 type ProgressProps struct {
 	Progress float32
+	Status   types.Status
 }
 
 func (p ProgressProps) DashOffset() float32 {
@@ -29,15 +30,37 @@ func (p ProgressProps) DashOffset() float32 {
 	return ((100 - p.Progress) / 100) * 43.96
 }
 
-func createDownloadRow(d modules.Download) DownloadRow {
-	return DownloadRow{Download: d, ProgressProps: ProgressProps{Progress: d.Progress}}
+func (p ProgressProps) IsPending() bool {
+	return p.Status == types.PENDING
+}
+
+func (p ProgressProps) HasCompleted() bool {
+	return p.Status == types.COMPLETED
+}
+
+func (p ProgressProps) HasError() bool {
+	return p.Status == types.ERROR
+}
+
+func createDownloadRow(d types.Download) DownloadRow {
+	return DownloadRow{
+		Download: d,
+		ProgressProps: ProgressProps{
+			Progress: d.Progress,
+			Status:   d.Status,
+		},
+	}
 }
 
 func (a *App) DownloadList(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles(DOWNLOADS_TEMPLATE...))
+	downloads, err := a.db.GetDownloads()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 
 	var downloadRows []DownloadRow
-	for _, d := range a.mock.Downloads {
+	for _, d := range downloads {
 		downloadRows = append(downloadRows, createDownloadRow(d))
 	}
 
@@ -50,7 +73,12 @@ func (a *App) DownloadList(w http.ResponseWriter, r *http.Request) {
 func (a *App) NewDownload(w http.ResponseWriter, r *http.Request) {
 	url := r.PostFormValue("url")
 	downloadPath := r.PostFormValue("directory")
-	newDownload := modules.DownloadVideo(a.mock, url, downloadPath)
+	newDownload, err := modules.DownloadVideo(a.db, url, downloadPath)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	tmpl := template.Must(template.ParseFiles(DOWNLOADS_TEMPLATE...))
 	tmpl.ExecuteTemplate(w, "download-list-element", createDownloadRow(newDownload))
 }
@@ -58,27 +86,14 @@ func (a *App) NewDownload(w http.ResponseWriter, r *http.Request) {
 func (a *App) DeleteDownload(w http.ResponseWriter, r *http.Request) {
 	idString := r.PathValue("id")
 
-	id, err := strconv.Atoi(idString)
+	id, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	index, err := a.findDownload(id)
+	err = a.db.DeleteDownload(id)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
+		w.WriteHeader(http.StatusInternalServerError)
 	}
-
-	a.mock.Downloads = append(a.mock.Downloads[:index], a.mock.Downloads[index+1:]...)
-}
-
-func (a *App) findDownload(id int) (int, error) {
-	for i, d := range a.mock.Downloads {
-		if d.Id == id {
-			return i, nil
-		}
-	}
-
-	return 0, errors.New("No download found with id")
 }

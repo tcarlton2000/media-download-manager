@@ -3,29 +3,21 @@ package modules
 import (
 	"io"
 	"log"
+	"media-download-manager/db"
+	"media-download-manager/types"
 	"os"
-	"time"
 
 	"github.com/kkdai/youtube/v2"
 )
 
-type Download struct {
-	Id            int
-	Title         string
-	DownloadPath  string
-	Url           string
-	Status        Status
-	TimeRemaining time.Duration
-	Progress      float32
-}
-
-func DownloadVideo(m Mock, url string, downloadPath string) Download {
+func DownloadVideo(db *db.Database, url string, downloadPath string) (types.Download, error) {
 	client := youtube.Client{}
 
 	log.Print("Getting video info...")
 	video, err := client.GetVideo(url)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return types.Download{}, err
 	}
 
 	log.Print("Getting video formats...")
@@ -52,5 +44,11 @@ func DownloadVideo(m Mock, url string, downloadPath string) Download {
 		log.Fatal(err)
 	}
 
-	return m.NewDownload(video.Title, url, downloadPath)
+	download := types.Download{Url: url, Title: video.Title, DownloadPath: downloadPath}
+	download.Id, err = db.NewDownload(download)
+	if err != nil {
+		return types.Download{}, err
+	}
+
+	return download, nil
 }

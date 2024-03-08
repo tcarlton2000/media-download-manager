@@ -1,11 +1,13 @@
 package app
 
-import "media-download-manager/modules"
+import (
+	"media-download-manager/db"
+)
 
 type App struct {
-	mock modules.Mock
+	db *db.Database
 }
 
 func (a *App) Init() {
-	a.mock.Init()
+	a.db = db.OpenDb()
 }

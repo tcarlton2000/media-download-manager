@@ -1,4 +1,4 @@
-package modules
+package types
 
 type Status int
 
