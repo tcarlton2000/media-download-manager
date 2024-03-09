@@ -30,18 +30,6 @@ func (p ProgressProps) DashOffset() float32 {
 	return ((100 - p.Progress) / 100) * 43.96
 }
 
-func (p ProgressProps) IsPending() bool {
-	return p.Status == types.PENDING
-}
-
-func (p ProgressProps) HasCompleted() bool {
-	return p.Status == types.COMPLETED
-}
-
-func (p ProgressProps) HasError() bool {
-	return p.Status == types.ERROR
-}
-
 func createDownloadRow(d types.Download) DownloadRow {
 	return DownloadRow{
 		Download: d,
@@ -50,6 +38,24 @@ func createDownloadRow(d types.Download) DownloadRow {
 			Status:   d.Status,
 		},
 	}
+}
+
+func (a *App) Index(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles(DOWNLOADS_TEMPLATE...))
+	downloads, err := a.db.GetDownloads()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	var downloadRows []DownloadRow
+	for _, d := range downloads {
+		downloadRows = append(downloadRows, createDownloadRow(d))
+	}
+
+	keyMap := map[string][]DownloadRow{
+		"Downloads": downloadRows,
+	}
+	tmpl.Execute(w, keyMap)
 }
 
 func (a *App) DownloadList(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +73,7 @@ func (a *App) DownloadList(w http.ResponseWriter, r *http.Request) {
 	keyMap := map[string][]DownloadRow{
 		"Downloads": downloadRows,
 	}
-	tmpl.Execute(w, keyMap)
+	tmpl.ExecuteTemplate(w, "downloads", keyMap)
 }
 
 func (a *App) NewDownload(w http.ResponseWriter, r *http.Request) {

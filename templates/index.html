@@ -22,6 +22,8 @@
             </button>
         </div>
 
+        {{ block "downloads" .}}
+        <div id="downloads" hx-get="/downloads" hx-trigger="every 1s">
         <ul id="download-list" hx-confirm="Are you sure?" hx-target="closest li" hx-swap="outerHTML"
             class="w-full divide-y divide-gray-200 border-2 border-solid rounded-lg border-gray-200">
             {{ range .Downloads }}
@@ -29,10 +31,12 @@
             <li class="p-3 flex justify-between items-center gap-2">
                 <div class="flex gap-2 items-center">
                     {{ template "progress" .ProgressProps }}
+                    {{ if not .Download.Status.IsPending }}
                     <div>
                         <div class="font-bold text-gray-800 dark:text-white">{{ .Download.Title }}</div>
                         <div class="text-gray-800 dark:text-white">{{ .Download.TimeRemaining }}</div>
                     </div>
+                    {{ end }}
                 </div>
                 <div class="text-black dark:text-white fill-current w-6 h-6 cursor-pointer shrink-0" hx-delete="/downloads/{{ .Download.Id }}">
                     {{ template "close-icon" }}
@@ -41,6 +45,8 @@
             {{ end }}
             {{ end }}
         </ul>
+        </div>
+        {{ end }}
     </div>
 </body>
 

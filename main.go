@@ -13,7 +13,8 @@ func main() {
 	app.Init()
 	fmt.Println("App Started")
 
-	http.HandleFunc("/", app.DownloadList)
+	http.HandleFunc("/", app.Index)
+	http.HandleFunc("GET /downloads", app.DownloadList)
 	http.HandleFunc("GET /modal", app.DownloadModal)
 	http.HandleFunc("POST /new-download/", app.NewDownload)
 	http.HandleFunc("DELETE /downloads/{id}", app.DeleteDownload)

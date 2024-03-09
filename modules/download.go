@@ -1,54 +1,77 @@
 package modules
 
 import (
+	"context"
+	"fmt"
 	"io"
 	"log"
 	"media-download-manager/db"
 	"media-download-manager/types"
 	"os"
 
-	"github.com/kkdai/youtube/v2"
+	"github.com/wader/goutubedl"
 )
 
 func DownloadVideo(db *db.Database, url string, downloadPath string) (types.Download, error) {
-	client := youtube.Client{}
-
-	log.Print("Getting video info...")
-	video, err := client.GetVideo(url)
-	if err != nil {
-		log.Print(err)
-		return types.Download{}, err
-	}
-
-	log.Print("Getting video formats...")
-	formats := video.Formats.WithAudioChannels()
-
-	log.Print("Getting video stream...")
-	stream, _, err := client.GetStream(video, &formats[0])
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stream.Close()
-
-	log.Print("Creating video file...")
-	file, err := os.Create("video.mp4")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stream.Close()
-
-	// This part goes into the thread
-	log.Print("Copying video to file...")
-	_, err = io.Copy(file, stream)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	download := types.Download{Url: url, Title: video.Title, DownloadPath: downloadPath}
+	var err error
+	download := types.Download{Url: url, DownloadPath: downloadPath}
 	download.Id, err = db.NewDownload(download)
 	if err != nil {
 		return types.Download{}, err
 	}
 
+	go finishDownload(db, download)
 	return download, nil
+}
+
+func finishDownload(db *db.Database, download types.Download) {
+	log.Print("Starting Info...")
+	result, err := goutubedl.New(context.Background(), download.Url, goutubedl.Options{})
+	if err != nil {
+		log.Print(err)
+		download.Status = types.ERROR
+		db.UpdateDownload(download)
+		return
+	}
+
+	download.Status = types.IN_PROGRESS
+	download.Title = result.Info.Title
+	log.Print(result.Info.Title)
+	db.UpdateDownload(download)
+
+	log.Print("Downloading Video...")
+	downloadResult, err := result.Download(context.Background(), "best")
+	if err != nil {
+		handleDownloadError(db, download, err)
+		return
+	}
+	defer downloadResult.Close()
+
+	log.Print("Creating File...")
+	f, err := os.Create(fmt.Sprintf("%s/%s.mp4", download.DownloadPath, download.Title))
+	if err != nil {
+		handleDownloadError(db, download, err)
+		return
+	}
+	defer f.Close()
+
+	download.Status = types.IN_PROGRESS
+	db.UpdateDownload(download)
+
+	log.Print("Copying file...")
+	_, err = io.Copy(f, downloadResult)
+	if err != nil {
+		handleDownloadError(db, download, err)
+		return
+	}
+
+	download.Progress = 100.0
+	download.Status = types.COMPLETED
+	db.UpdateDownload(download)
+}
+
+func handleDownloadError(db *db.Database, d types.Download, err error) {
+	log.Print(err)
+	d.Status = types.ERROR
+	db.UpdateDownload(d)
 }

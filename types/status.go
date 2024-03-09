@@ -8,3 +8,15 @@ const (
 	COMPLETED   = Status(2)
 	ERROR       = Status(3)
 )
+
+func (s Status) IsPending() bool {
+	return s == PENDING
+}
+
+func (s Status) HasCompleted() bool {
+	return s == COMPLETED
+}
+
+func (s Status) HasError() bool {
+	return s == ERROR
+}

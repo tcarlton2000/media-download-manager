@@ -3,6 +3,8 @@ package db
 import (
 	"database/sql"
 	"log"
+	"sync"
+	"time"
 
 	"media-download-manager/types"
 
@@ -22,24 +24,31 @@ const create string = `
 `
 
 type Database struct {
-	db *sql.DB
+	sync.Mutex
+	readDb  *sql.DB
+	writeDb *sql.DB
 }
 
 func OpenDb() *Database {
-	db, err := sql.Open("sqlite3", "./media-download-manager.db")
+	writeDb, err := sql.Open("sqlite3", "file:media-download-manager.db?mode=rw")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if _, err := db.Exec(create); err != nil {
+	if _, err := writeDb.Exec(create); err != nil {
 		log.Fatal(err)
 	}
 
-	return &Database{db: db}
+	readDb, err := sql.Open("sqlite3", "file:media-download-manager.db?mode=ro")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &Database{readDb: readDb, writeDb: writeDb}
 }
 
 func (db *Database) GetDownloads() ([]types.Download, error) {
-	rows, err := db.db.Query("SELECT * FROM downloads")
+	rows, err := db.readDb.Query("SELECT * FROM downloads ORDER BY id DESC")
 	if err != nil {
 		log.Print(err)
 		return []types.Download{}, err
@@ -49,11 +58,14 @@ func (db *Database) GetDownloads() ([]types.Download, error) {
 	var downloads []types.Download
 	for rows.Next() {
 		var d types.Download
-		err = rows.Scan(&d.Id, &d.Title, &d.Url, &d.DownloadPath, &d.Status, &d.Progress, &d.TimeRemaining)
+		var timeRemainingMs int64
+		err = rows.Scan(&d.Id, &d.Title, &d.Url, &d.DownloadPath, &d.Status, &d.Progress, &timeRemainingMs)
 		if err != nil {
 			log.Print(err)
 			return []types.Download{}, err
 		}
+
+		d.TimeRemaining = time.Duration(timeRemainingMs) * time.Millisecond
 
 		downloads = append(downloads, d)
 	}
@@ -62,13 +74,14 @@ func (db *Database) GetDownloads() ([]types.Download, error) {
 }
 
 func (db *Database) NewDownload(d types.Download) (int64, error) {
-	stmt, err := db.db.Prepare("INSERT INTO downloads(title, url, download_path, status, progress, time_remaining_ms) values (?, ?, ?, ?, ?, ?)")
+	db.Lock()
+	stmt, err := db.writeDb.Prepare("INSERT INTO downloads(title, url, download_path, status, progress, time_remaining_ms) values (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Print(err)
 		return 0, err
 	}
 
-	res, err := stmt.Exec(d.Title, d.Url, d.DownloadPath, d.Status, d.Progress, d.TimeRemaining)
+	res, err := stmt.Exec(d.Title, d.Url, d.DownloadPath, d.Status, d.Progress, d.TimeRemaining.Milliseconds())
 	if err != nil {
 		log.Print(err)
 		return 0, err
@@ -80,11 +93,34 @@ func (db *Database) NewDownload(d types.Download) (int64, error) {
 		return 0, err
 	}
 
+	db.Unlock()
 	return id, nil
 }
 
+func (db *Database) UpdateDownload(d types.Download) error {
+	db.Lock()
+	stmt, err := db.writeDb.Prepare("UPDATE downloads SET title=?, status=?, progress=?, time_remaining_ms=? WHERE id=?")
+	if err != nil {
+		log.Print(err)
+		db.Unlock()
+		return err
+	}
+
+	log.Printf("Executing %f progress update", d.Progress)
+	_, err = stmt.Exec(d.Title, d.Status, d.Progress, d.TimeRemaining.Milliseconds(), d.Id)
+	if err != nil {
+		log.Print(err)
+		db.Unlock()
+		return err
+	}
+
+	db.Unlock()
+	return nil
+}
+
 func (db *Database) DeleteDownload(id int64) error {
-	stmt, err := db.db.Prepare("DELETE FROM downloads WHERE id = ?")
+	db.Lock()
+	stmt, err := db.writeDb.Prepare("DELETE FROM downloads WHERE id = ?")
 	if err != nil {
 		log.Print(err)
 		return err
@@ -96,5 +132,6 @@ func (db *Database) DeleteDownload(id int64) error {
 		return err
 	}
 
+	db.Unlock()
 	return nil
 }
