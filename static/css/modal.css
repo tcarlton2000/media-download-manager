@@ -84,3 +84,13 @@
 	0% {transform: scale(1);}
 	100% {transform: scale(0.9);}
 }
+
+.htmx-indicator {
+	display:none;
+}
+.htmx-request .htmx-indicator {
+	display:inline;
+}
+.htmx-request.htmx-indicator {
+	display:inline;
+}

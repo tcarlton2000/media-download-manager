@@ -16,20 +16,20 @@
         <h1 class="mb-4 text-4xl font-bold text-gray-800 dark:text-white">Media Download Manager</h1>
 
         <div class="w-full text-right mb-4">
-            <button hx-get="/modal" hx-target="body" hx-swap="beforeend"
+            <button hx-get="modal" hx-target="body" hx-swap="beforeend"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                 New Download
             </button>
         </div>
 
         {{ block "downloads" .}}
-        <div id="downloads" hx-get="/downloads" hx-trigger="every 1s" hx-swap="outerHTML">
+        <div id="downloads" hx-get="downloads" hx-trigger="every 1s" hx-swap="outerHTML">
             <div class="list-toggle p-2 w-full divide-y divide-gray-200 border-2 border-solid rounded-lg border-gray-200 text-center font-bold text-gray-800 dark:text-white{{ if gt (len .Downloads) 0 }} hidden{{ end }}"
                 _="on checkList set lis to <li/> then if lis.length is 0 remove .hidden from me else add .hidden to me">
                 No Downloads
             </div>
             <div class="list-toggle{{ if eq (len .Downloads) 0 }} hidden{{ end }}"
-                _="on checkList log set lis to <li/> then if lis.length is 0 add .hidden to me else remove .hidden from me">
+                _="on checkList set lis to <li/> then if lis.length is 0 add .hidden to me else remove .hidden from me">
                 <ul id="download-list" hx-confirm="Are you sure?" hx-target="closest li" hx-swap="outerHTML"
                     class="list-toggle w-full divide-y divide-gray-200 border-2 border-solid rounded-lg border-gray-200"
                     _="on htmx:afterSwap trigger checkList on .list-toggle">
@@ -46,7 +46,7 @@
                             {{ end }}
                         </div>
                         <div class="text-black dark:text-white fill-current w-6 h-6 cursor-pointer shrink-0"
-                            hx-delete="/downloads/{{ .Download.Id }}">
+                            hx-delete="downloads/{{ .Download.Id }}">
                             {{ template "close-icon" }}
                         </div>
                     </li>

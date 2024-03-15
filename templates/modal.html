@@ -2,7 +2,7 @@
 	<div class="modal-underlay" _="on click trigger closeModal"></div>
 	<div class="modal-content bg-white dark:bg-gray-800">
 		<h1 class="mb-4 text-xl font-bold text-gray-800 dark:text-white">New Download</h1>
-		<form hx-post="/new-download/" hx-target="#download-list" hx-swap="beforeend"
+		<form hx-post="new-download/" hx-target="#download-list" hx-swap="beforeend"
 			hx-on::after-request=" if(event.detail.successful) this.reset()"
 			_="on htmx:afterRequest trigger checkList on .list-toggle">
 			<div class="mb-4">
