@@ -23,31 +23,39 @@
         </div>
 
         {{ block "downloads" .}}
-        <div id="downloads" hx-get="/downloads" hx-trigger="every 1s">
-        <ul id="download-list" hx-confirm="Are you sure?" hx-target="closest li" hx-swap="outerHTML"
-            class="w-full divide-y divide-gray-200 border-2 border-solid rounded-lg border-gray-200">
-            {{ range .Downloads }}
-            {{ block "download-list-element" .}}
-            <li class="p-3 flex justify-between items-center gap-2">
-                <div class="flex gap-2 items-center">
-                    {{ template "progress" .ProgressProps }}
-                    {{ if not .Download.Status.IsPending }}
-                    <div>
-                        <div class="font-bold text-gray-800 dark:text-white">{{ .Download.Title }}</div>
-                        <div class="text-gray-800 dark:text-white">{{ .Download.TimeRemaining }}</div>
-                    </div>
+        <div id="downloads" hx-get="/downloads" hx-trigger="every 1s" hx-swap="outerHTML">
+            <div class="list-toggle p-2 w-full divide-y divide-gray-200 border-2 border-solid rounded-lg border-gray-200 text-center font-bold text-gray-800 dark:text-white{{ if gt (len .Downloads) 0 }} hidden{{ end }}"
+                _="on checkList set lis to <li/> then if lis.length is 0 remove .hidden from me else add .hidden to me">
+                No Downloads
+            </div>
+            <div class="list-toggle{{ if eq (len .Downloads) 0 }} hidden{{ end }}"
+                _="on checkList log set lis to <li/> then if lis.length is 0 add .hidden to me else remove .hidden from me">
+                <ul id="download-list" hx-confirm="Are you sure?" hx-target="closest li" hx-swap="outerHTML"
+                    class="list-toggle w-full divide-y divide-gray-200 border-2 border-solid rounded-lg border-gray-200"
+                    _="on htmx:afterSwap trigger checkList on .list-toggle">
+                    {{ range .Downloads }}
+                    {{ block "download-list-element" .}}
+                    <li class="p-3 flex justify-between items-center gap-2">
+                        <div class="flex gap-2 items-center">
+                            {{ template "progress" .ProgressProps }}
+                            {{ if not .Download.Status.IsPending }}
+                            <div>
+                                <div class="font-bold text-gray-800 dark:text-white">{{ .Download.Title }}</div>
+                                <div class="text-gray-800 dark:text-white">{{ .Download.TimeRemaining }}</div>
+                            </div>
+                            {{ end }}
+                        </div>
+                        <div class="text-black dark:text-white fill-current w-6 h-6 cursor-pointer shrink-0"
+                            hx-delete="/downloads/{{ .Download.Id }}">
+                            {{ template "close-icon" }}
+                        </div>
+                    </li>
                     {{ end }}
-                </div>
-                <div class="text-black dark:text-white fill-current w-6 h-6 cursor-pointer shrink-0" hx-delete="/downloads/{{ .Download.Id }}">
-                    {{ template "close-icon" }}
-                </div>
-            </li>
+                    {{ end }}
+                </ul>
+            </div>
             {{ end }}
-            {{ end }}
-        </ul>
         </div>
-        {{ end }}
-    </div>
 </body>
 
 </html>

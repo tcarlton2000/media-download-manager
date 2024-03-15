@@ -30,18 +30,20 @@ type Database struct {
 }
 
 func OpenDb() *Database {
-	writeDb, err := sql.Open("sqlite3", "file:media-download-manager.db?mode=rw")
+	writeDb, err := sql.Open("sqlite3", "file:media-download-manager.db?mode=rwc")
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
+	// SQLite can have only 1 open write connection at a time.
+	writeDb.SetMaxOpenConns(1)
 	if _, err := writeDb.Exec(create); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	readDb, err := sql.Open("sqlite3", "file:media-download-manager.db?mode=ro")
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	return &Database{readDb: readDb, writeDb: writeDb}

@@ -2,10 +2,14 @@
 <div id="directory-list">
     <input name="directory" class="hidden" value="{{ .CurrentDirectory }}">
     <span class="text-gray-800 dark:text-white text-sm italic">Current Directory: {{ .CurrentDirectory }}</span>
-    <select name="directory-picker" multiple class="w-full bg-white text-gray-800 dark:bg-gray-800 dark:text-white overflow-hidden" size="{{ len .Directories }}">
-        <option value="{{ $.PreviousDirectory }}" hx-trigger="click" hx-post="/directories/" hx-target="#directory-list" hx-swap="outerHTML">..</option>
+    <select name="directory-picker" multiple
+        class="w-full bg-white text-gray-800 dark:bg-gray-800 dark:text-white overflow-hidden px-1 border rounded border-gray-200"
+        size="{{ len .Directories }}">
+        <option value="{{ $.PreviousDirectory }}" hx-trigger="click" hx-post="/directories/" hx-target="#directory-list"
+            hx-swap="outerHTML">..</option>
         {{ range .Directories }}
-        <option value="{{ $.CurrentDirectory }}/{{ .Name }}" hx-trigger="click" hx-post="/directories/" hx-target="#directory-list" hx-swap="outerHTML">{{ .Name }}</option>
+        <option value="{{ $.CurrentDirectory }}/{{ .Name }}" hx-trigger="click" hx-post="/directories/"
+            hx-target="#directory-list" hx-swap="outerHTML">{{ .Name }}</option>
         {{ end }}
     </select>
 </div>
