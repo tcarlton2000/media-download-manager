@@ -13,12 +13,12 @@ RUN ./tailwindcss -i input.css -o static/css/output.css
 
 FROM alpine:latest AS production
 
+RUN apk add libc6-compat python3
+ADD --chmod=777 https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp /usr/local/bin/yt-dlp
+
 COPY --from=builder /dist .
 COPY --from=builder /app/static static
 COPY --from=builder /app/templates templates
-
-RUN apk add libc6-compat python3
-ADD --chmod=777 https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp /usr/local/bin/yt-dlp
 
 EXPOSE 8000
 CMD ["./main"]
