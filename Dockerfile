@@ -14,10 +14,11 @@ ADD https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.1/tailwin
 RUN chmod a+x tailwindcss
 RUN ./tailwindcss -i input.css -o static/css/output.css
 
-FROM scratch AS production
+FROM alpine:latest AS production
 
 COPY --from=builder /dist .
-COPY --from=builder /app/static .
+COPY --from=builder /app/static static
+COPY --from=builder /app/templates templates
 
 ADD https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp /usr/local/bin/yt-dlp
 

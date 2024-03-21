@@ -1,0 +1,8 @@
+Dockerfile
+.git
+
+tailwindcss
+static/css/output.css
+
+main
+media-download-manager.db
