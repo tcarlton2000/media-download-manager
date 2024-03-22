@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -29,8 +30,8 @@ type Database struct {
 	writeDb *sql.DB
 }
 
-func OpenDb() *Database {
-	writeDb, err := sql.Open("sqlite3", "file:media-download-manager.db?mode=rwc")
+func OpenDb(configDir string) *Database {
+	writeDb, err := sql.Open("sqlite3", fmt.Sprintf("file:%smedia-download-manager.db?mode=rwc", configDir))
 	if err != nil {
 		panic(err)
 	}

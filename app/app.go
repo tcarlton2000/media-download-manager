@@ -27,7 +27,8 @@ type App struct {
 }
 
 func (a *App) Init() {
-	a.db = db.OpenDb()
+	configDir := getEnv("CONFIG", "./")
+	a.db = db.OpenDb(configDir)
 
 	a.auth.username = getEnv("AUTH_USERNAME", "admin")
 	a.auth.password = getEnv("AUTH_PASSWORD", "password")
