@@ -31,7 +31,7 @@ type Database struct {
 }
 
 func OpenDb(configDir string) *Database {
-	writeDb, err := sql.Open("sqlite3", fmt.Sprintf("file:%smedia-download-manager.db?mode=rwc", configDir))
+	writeDb, err := sql.Open("sqlite3", fmt.Sprintf("file:%s/media-download-manager.db?mode=rwc", configDir))
 	if err != nil {
 		panic(err)
 	}
@@ -42,7 +42,7 @@ func OpenDb(configDir string) *Database {
 		panic(err)
 	}
 
-	readDb, err := sql.Open("sqlite3", "file:media-download-manager.db?mode=ro")
+	readDb, err := sql.Open("sqlite3", fmt.Sprintf("file:%s/media-download-manager.db?mode=ro", configDir))
 	if err != nil {
 		panic(err)
 	}
