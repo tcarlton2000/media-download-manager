@@ -1,17 +1,13 @@
 package modules
 
 import (
-	"context"
 	"fmt"
-	"io"
-	"log"
 	"media-download-manager/db"
 	"media-download-manager/types"
-	"os"
-
-	"github.com/wader/goutubedl"
+	"os/exec"
 )
 
+// Starts download and creates download entry in the database.
 func DownloadVideo(db *db.Database, url string, downloadPath string) (types.Download, error) {
 	var err error
 	download := types.Download{Url: url, DownloadPath: downloadPath}
@@ -20,58 +16,22 @@ func DownloadVideo(db *db.Database, url string, downloadPath string) (types.Down
 		return types.Download{}, err
 	}
 
-	go finishDownload(db, download)
+	go startDownload(db, download)
 	return download, nil
 }
 
-func finishDownload(db *db.Database, download types.Download) {
-	log.Print("Starting Info...")
-	result, err := goutubedl.New(context.Background(), download.Url, goutubedl.Options{})
-	if err != nil {
-		log.Print(err)
+func startDownload(db *db.Database, download types.Download) {
+	cmd := exec.Command("yt-dlp", "--no-mtime", download.Url)
+	cmd.Dir = download.DownloadPath
+	cmd.Stdout = YoutubeDlParser{db: db, download: &download}
+
+	if err := cmd.Run(); err != nil {
+		fmt.Println("could not run command: ", err)
 		download.Status = types.ERROR
 		db.UpdateDownload(download)
-		return
 	}
 
-	download.Status = types.IN_PROGRESS
-	download.Title = result.Info.Title
-	log.Print(result.Info.Title)
-	db.UpdateDownload(download)
-
-	log.Print("Downloading Video...")
-	downloadResult, err := result.Download(context.Background(), "best")
-	if err != nil {
-		handleDownloadError(db, download, err)
-		return
-	}
-	defer downloadResult.Close()
-
-	log.Print("Creating File...")
-	f, err := os.Create(fmt.Sprintf("%s/%s.mp4", download.DownloadPath, download.Title))
-	if err != nil {
-		handleDownloadError(db, download, err)
-		return
-	}
-	defer f.Close()
-
-	download.Status = types.IN_PROGRESS
-	db.UpdateDownload(download)
-
-	log.Print("Copying file...")
-	_, err = io.Copy(f, downloadResult)
-	if err != nil {
-		handleDownloadError(db, download, err)
-		return
-	}
-
-	download.Progress = 100.0
+	download.Progress = 100
 	download.Status = types.COMPLETED
 	db.UpdateDownload(download)
-}
-
-func handleDownloadError(db *db.Database, d types.Download, err error) {
-	log.Print(err)
-	d.Status = types.ERROR
-	db.UpdateDownload(d)
 }

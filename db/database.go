@@ -1,12 +1,6 @@
 package db
 
 import (
-	"database/sql"
-	"fmt"
-	"log"
-	"sync"
-	"time"
-
 	"media-download-manager/types"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -25,116 +19,29 @@ const create string = `
 `
 
 type Database struct {
-	sync.Mutex
-	readDb  *sql.DB
-	writeDb *sql.DB
+	readDb  *ReadDb
+	writeDb *WriteDb
 }
 
 func OpenDb(configDir string) *Database {
-	writeDb, err := sql.Open("sqlite3", fmt.Sprintf("file:%s/media-download-manager.db?mode=rwc", configDir))
-	if err != nil {
-		panic(err)
-	}
-
-	// SQLite can have only 1 open write connection at a time.
-	writeDb.SetMaxOpenConns(1)
-	if _, err := writeDb.Exec(create); err != nil {
-		panic(err)
-	}
-
-	readDb, err := sql.Open("sqlite3", fmt.Sprintf("file:%s/media-download-manager.db?mode=ro", configDir))
-	if err != nil {
-		panic(err)
-	}
+	writeDb := OpenWriteDb(configDir)
+	readDb := OpenReadDb(configDir)
 
 	return &Database{readDb: readDb, writeDb: writeDb}
 }
 
 func (db *Database) GetDownloads() ([]types.Download, error) {
-	rows, err := db.readDb.Query("SELECT * FROM downloads ORDER BY id DESC")
-	if err != nil {
-		log.Print(err)
-		return []types.Download{}, err
-	}
-	defer rows.Close()
-
-	var downloads []types.Download
-	for rows.Next() {
-		var d types.Download
-		var timeRemainingMs int64
-		err = rows.Scan(&d.Id, &d.Title, &d.Url, &d.DownloadPath, &d.Status, &d.Progress, &timeRemainingMs)
-		if err != nil {
-			log.Print(err)
-			return []types.Download{}, err
-		}
-
-		d.TimeRemaining = time.Duration(timeRemainingMs) * time.Millisecond
-
-		downloads = append(downloads, d)
-	}
-
-	return downloads, nil
+	return db.readDb.GetDownloads()
 }
 
 func (db *Database) NewDownload(d types.Download) (int64, error) {
-	db.Lock()
-	stmt, err := db.writeDb.Prepare("INSERT INTO downloads(title, url, download_path, status, progress, time_remaining_ms) values (?, ?, ?, ?, ?, ?)")
-	if err != nil {
-		log.Print(err)
-		return 0, err
-	}
-
-	res, err := stmt.Exec(d.Title, d.Url, d.DownloadPath, d.Status, d.Progress, d.TimeRemaining.Milliseconds())
-	if err != nil {
-		log.Print(err)
-		return 0, err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		log.Print(err)
-		return 0, err
-	}
-
-	db.Unlock()
-	return id, nil
+	return db.writeDb.NewDownload(d)
 }
 
 func (db *Database) UpdateDownload(d types.Download) error {
-	db.Lock()
-	stmt, err := db.writeDb.Prepare("UPDATE downloads SET title=?, status=?, progress=?, time_remaining_ms=? WHERE id=?")
-	if err != nil {
-		log.Print(err)
-		db.Unlock()
-		return err
-	}
-
-	log.Printf("Executing %f progress update", d.Progress)
-	_, err = stmt.Exec(d.Title, d.Status, d.Progress, d.TimeRemaining.Milliseconds(), d.Id)
-	if err != nil {
-		log.Print(err)
-		db.Unlock()
-		return err
-	}
-
-	db.Unlock()
-	return nil
+	return db.writeDb.UpdateDownload(d)
 }
 
 func (db *Database) DeleteDownload(id int64) error {
-	db.Lock()
-	stmt, err := db.writeDb.Prepare("DELETE FROM downloads WHERE id = ?")
-	if err != nil {
-		log.Print(err)
-		return err
-	}
-
-	_, err = stmt.Exec(id)
-	if err != nil {
-		log.Print(err)
-		return err
-	}
-
-	db.Unlock()
-	return nil
+	return db.writeDb.DeleteDownload(id)
 }
