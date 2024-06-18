@@ -18,7 +18,6 @@ ADD --chmod=777 https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp
 
 COPY --from=builder /dist .
 COPY --from=builder /app/static static
-COPY --from=builder /app/templates templates
 
 EXPOSE 8000
 CMD ["./main"]

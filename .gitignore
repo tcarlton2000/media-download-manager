@@ -9,3 +9,5 @@ main
 
 # Database
 media-download-manager.db
+media-download-manager.db-shm
+media-download-manager.db-wal

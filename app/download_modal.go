@@ -2,22 +2,11 @@ package app
 
 import (
 	"log"
+	"media-download-manager/views"
 	"net/http"
 	"os"
 	"strings"
-	"text/template"
 )
-
-var DOWNLOAD_MODAL_TEMPLATE []string = []string{
-	"templates/modal.html",
-	"templates/directory_picker.html",
-}
-
-type DownloadModalProps struct {
-	CurrentDirectory  string
-	PreviousDirectory string
-	Directories       []os.DirEntry
-}
 
 func (a *App) DownloadModal(w http.ResponseWriter, r *http.Request) {
 	currentDirectory, err := os.Getwd()
@@ -37,12 +26,7 @@ func (a *App) DownloadModal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tmpl := template.Must(template.ParseFiles(DOWNLOAD_MODAL_TEMPLATE...))
-	tmpl.Execute(w, DownloadModalProps{
-		CurrentDirectory:  currentDirectory,
-		PreviousDirectory: getPreviousDirectory(currentDirectory),
-		Directories:       directories,
-	})
+	_ = views.DownloadModal(currentDirectory, getPreviousDirectory(currentDirectory), directories).Render(w)
 }
 
 func (a *App) RefreshDirectoryList(w http.ResponseWriter, r *http.Request) {
@@ -60,12 +44,7 @@ func (a *App) RefreshDirectoryList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tmpl := template.Must(template.ParseFiles(DOWNLOAD_MODAL_TEMPLATE...))
-	tmpl.ExecuteTemplate(w, "directory-list", DownloadModalProps{
-		CurrentDirectory:  directory,
-		PreviousDirectory: getPreviousDirectory(directory),
-		Directories:       directories,
-	})
+	_ = views.DirectoryPicker(directory, getPreviousDirectory(directory), directories).Render(w)
 }
 
 func getPreviousDirectory(directory string) string {
