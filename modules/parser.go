@@ -54,7 +54,7 @@ func (ydp YoutubeDlParser) parseTitle(s string) error {
 }
 
 func (ydp YoutubeDlParser) parseStats(s string) error {
-	pr, err := regexp.Compile(`((\d+\.)?\d+)%\s+of\s+(~?\d+\.\d+\w+)\s+at\s+(\d+\.\d+.+)\s+ETA\s+((\d+:)?\d+:\d+)`)
+	pr, err := regexp.Compile(`((\d+\.)?\d+)%\s+of\s+((?:~\s*)?\d+\.\d+\w+)\s+at\s+(\d+\.\d+.+)\s+ETA\s+((\d+:)?\d+:\d+)`)
 	if err != nil {
 		return err
 	}
